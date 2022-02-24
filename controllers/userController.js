@@ -36,5 +36,19 @@ module.exports = {
                     ? res.status(404).json({ message: 'No user with this id!' })
                     : res.json(user)
             )
+    },
+    deleteUser(req, res) {
+        User.findOneAndRemove(
+            { _id: req.params.userId },
+            { $pull: { _id: req.params.userId}},
+            { new: true}
+        )
+        .then((user) =>
+        !user
+          ? res
+              .status(404)
+              .json({ message: 'User created but no user with this id!' })
+          : res.json({ message: 'User successfully deleted!' })
+        )
     }
 }
