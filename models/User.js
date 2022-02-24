@@ -5,6 +5,12 @@ const userSchema = new mongoose.Schema({
     email: {type: String, required: true, unique: true,  validate: [validateEmail, 'Please fill a valid email address'],},
     thoughts: [{ type: Schema.Types.ObjectId, ref: 'Thought' }],
     friends: [{ type: Schema.Types.ObjectId, ref: 'User' }],
+},
+{
+    toJSON: {
+        virtuals: true,
+    },
+    id: false,
 });
 
 const User = mongoose.model('User', userSchema);
