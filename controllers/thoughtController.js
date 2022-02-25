@@ -50,16 +50,24 @@ module.exports = {
         });
     },
     deleteThought(req, res) {
-        Thought.findOneAndRemove(
-            { _id: req.params.thoughtId },
-            { new: true }
-        ).then((thought) =>
-            !thought
-                ? res.status(404).json({ message: 'No thought with this id!' })
-                : res.json(thought)
-        ).catch((err) => {
-            console.error({ message: err });
-            return res.status(500).json(err);
-        });
+        User.findOneAndUpdate(
+            { thoughts: req.params.thoughtId },
+            { $pull: { thoughts: req.params.thoughtId } },
+            { runValidators: true, new: true }
+        ).then((user) =>
+        !user
+          ? res.status(404).json({ message: 'No user with this id!' })
+          : Thought.findOneAndDelete(
+              { _id : req.params.thoughtId },
+              { new: true }
+            )
+        ) .then((thought) =>
+        !thought
+          ? res
+              .status(404)
+              .json({ message: 'Thought created but no user with this id!' })
+          : res.json({ message: 'Thought successfully deleted!' })
+      )
+
     }
 }
