@@ -40,15 +40,48 @@ module.exports = {
     deleteUser(req, res) {
         User.findOneAndRemove(
             { _id: req.params.userId },
-            { $pull: { _id: req.params.userId}},
-            { new: true}
+            { $pull: { _id: req.params.userId } },
+            { new: true }
         )
-        .then((user) =>
-        !user
-          ? res
-              .status(404)
-              .json({ message: 'User created but no user with this id!' })
-          : res.json({ message: 'User successfully deleted!' })
+            .then((user) =>
+                !user
+                    ? res
+                        .status(404)
+                        .json({ message: 'User created but no user with this id!' })
+                    : res.json({ message: 'User successfully deleted!' })
+            )
+    },
+    createFriend(req, res) {
+        User.create(req.body)
+            .then((user) => {
+                return User.findOneAndUpdate(
+                    { _id: req.params.userId },
+                    { $addToSet: { friends: user._id } },
+                    { new: true }
+                )
+            })
+            .then((user) =>
+                !user
+                    ? res.status(404).json({
+                        message: 'User created, but found no user with that ID',
+                    })
+                    : res.json('Created the User with associated friend')
+            )
+            .catch((err) => {
+                console.log(err);
+                res.status(500).json(err);
+            });
+    },
+    deleteFriend(req, res) {
+        User.findOneAndUpdate(
+            { _id: req.params.userId },
+            { $pull: { friends: req.params.friendId } },
+            { new: true }
         )
+            .then((user) =>
+                !user
+                    ? res.status(404).json({ message: 'No user with this id!' })
+                    : res.json(user)
+            )
     }
 }
