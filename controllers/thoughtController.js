@@ -1,4 +1,5 @@
 const { User, Reaction, Thought } = require('../models');
+const { replaceOne } = require('../models/User');
 
 module.exports = {
     getThought(req, res) {
@@ -43,6 +44,19 @@ module.exports = {
             { runValidators: true, new: true }
         ).then((thought) =>
             res.json(thought)
+        ).catch((err) => {
+            console.error({ message: err });
+            return res.status(500).json(err);
+        });
+    },
+    deleteThought(req, res) {
+        Thought.findOneAndRemove(
+            { _id: req.params.thoughtId },
+            { new: true }
+        ).then((thought) =>
+            !thought
+                ? res.status(404).json({ message: 'No thought with this id!' })
+                : res.json(thought)
         ).catch((err) => {
             console.error({ message: err });
             return res.status(500).json(err);
