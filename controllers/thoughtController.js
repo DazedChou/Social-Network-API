@@ -12,10 +12,12 @@ module.exports = {
     getSingleThought(req, res) {
         Thought.findOne({ _id: req.params.thoughtId })
             .then((thought) =>
-                !thought
-                    ? res.status(404).json({ message: "No thought with that ID" })
-                    : res.json(thought)
+                res.json(thought)
             )
+            .catch((err) => {
+                console.error({ message: err });
+                return res.status(500).json(err);
+            });
     },
     createThought(req, res) {
         Thought.create(req.body)
@@ -23,22 +25,27 @@ module.exports = {
                 res.json(thought);
                 return User.findByIdAndUpdate(
                     { _id: req.body.userId },
-                    { $push: { thoughts: thought._id }}
+                    { $push: { thoughts: thought._id } }
                 );
-          
+
             })
             .catch((err) => {
                 console.error({ message: err });
                 return res.status(500).json(err);
             });
-        
+
 
     },
     updateThought(req, res) {
-        Thought.findByIdAndUpdate(
+        Thought.findOneAndUpdate(
             { _id: req.params.thoughtId },
-            { $set: { thoughtText: req.params.body } },
-            { new: true }
-        )
+            { $set: { thoughtText: req.body.thoughtText } },
+            { runValidators: true, new: true }
+        ).then((thought) =>
+            res.json(thought)
+        ).catch((err) => {
+            console.error({ message: err });
+            return res.status(500).json(err);
+        });
     }
 }
