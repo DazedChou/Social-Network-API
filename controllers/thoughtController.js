@@ -20,13 +20,13 @@ module.exports = {
     createThought(req, res) {
         Thought.create(req.body)
             .then((thought) => {
-                Thought.updateOne(
-                    { _id: thought._id},
-                    { $set: {username: }}
-                )
+                // Thought.updateOne(
+                //     { _id: thought._id},
+                //     { $set: {username: req.params.thoughtId}}
+                // )
                 return User.findByIdAndUpdate(
                     { _id: req.params.thoughtId },
-                    { $push: { thoughts: thought._id } }
+                    { $push: { thoughts: thought._id }}
                 )
             })
             .catch((err) => {
