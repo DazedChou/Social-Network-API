@@ -8,7 +8,7 @@ module.exports = {
                 console.error({ message: err });
                 return res.status(500).json(err);
             });
-    }, 
+    },
     getSingleThought(req, res) {
         Thought.findOne({ _id: req.params.thoughtId })
             .then((thought) =>
@@ -19,10 +19,28 @@ module.exports = {
     },
     createThought(req, res) {
         Thought.create(req.body)
-        .then((thought) => res.json(thought))
-        .catch((err) => {
-            console.error({ message: err });
-            return res.status(500).json(err);
-        });
+            .then((thought) => {
+                Thought.updateOne(
+                    { _id: thought._id},
+                    { $set: {username: }}
+                )
+                return User.findByIdAndUpdate(
+                    { _id: req.params.thoughtId },
+                    { $push: { thoughts: thought._id } }
+                )
+            })
+            .catch((err) => {
+                console.error({ message: err });
+                return res.status(500).json(err);
+            });
+        
+
+    },
+    updateThought(req, res) {
+        Thought.findByIdAndUpdate(
+            { _id: req.params.thoughtId },
+            { $set: { thoughtText: req.params.body } },
+            { new: true }
+        )
     }
 }
