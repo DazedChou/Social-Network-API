@@ -1,5 +1,4 @@
-const { User, Reaction, Thought } = require('../models');
-const { replaceOne } = require('../models/User');
+const { User, Thought } = require('../models');
 
 module.exports = {
     getThought(req, res) {
@@ -55,19 +54,50 @@ module.exports = {
             { $pull: { thoughts: req.params.thoughtId } },
             { runValidators: true, new: true }
         ).then((user) =>
-        !user
-          ? res.status(404).json({ message: 'No user with this id!' })
-          : Thought.findOneAndDelete(
-              { _id : req.params.thoughtId },
-              { new: true }
-            )
-        ) .then((thought) =>
-        !thought
-          ? res
-              .status(404)
-              .json({ message: 'Thought created but no user with this id!' })
-          : res.json({ message: 'Thought successfully deleted!' })
-      )
+            !user
+                ? res.status(404).json({ message: 'No user with this id!' })
+                : Thought.findOneAndDelete(
+                    { _id: req.params.thoughtId },
+                    { new: true }
+                )
+        ).then((thought) =>
+            !thought
+                ? res
+                    .status(404)
+                    .json({ message: 'Thought created but no user with this id!' })
+                : res.json({ message: 'Thought successfully deleted!' })
+        )
 
+    },
+    addReaction(req, res) {
+        Thought.findOneAndUpdate(
+            { _id: req.params.thoughtId },
+            { $addToSet: { reactions: req.body } },
+            { new: true, runValidators: true }
+        ).then((thought) =>
+            !thought
+                ? res.status(404).json({ message: 'No video with this id!' })
+                : res.json(thought)
+        )
+            .catch((err) => res.status(500).json(err));
+        // .populate({ path: 'reactions', select: '-__v' })
+        // .select('-__v')
+        // .then(thought => {
+        //     if (thought) {
+        //         res.status(404).json({ message: 'No thoughts with this particular ID!' });
+        //         return;
+        //     }
+        //     res.json(thought);
+        // })
+        // .catch(err => res.status(500).json(err))
+        // Thought.findOneAndUpdate(
+        //     { _id: req.params.thoughId },
+        //     { $push: { reactions: req.body } }
+        // ).then((thought) =>
+        //     res.json(thought)
+        // ).catch((err) => {
+        //     console.error({ message: err });
+        //     return res.status(500).json(err);
+        // });
     }
 }
